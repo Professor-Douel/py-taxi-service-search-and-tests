@@ -58,8 +58,14 @@ class TaxiViewsTestCase(TestCase):
         self.assertIn(self.driver, response.context["object_list"])
 
     def test_toggle_assign_to_car(self):
+        # Спочатку додаємо користувача до списку водіїв авто
+        self.car.drivers.add(self.user)
+        self.car.save()
+        self.assertIn(self.user, self.car.drivers.all())
         response = self.client.post(reverse(
             "taxi:toggle-assign-to-car",
             args=[self.car.id])
         )
         self.assertEqual(response.status_code, 302)
+        self.car.refresh_from_db()
+        self.assertNotIn(self.user, self.car.drivers.all())
